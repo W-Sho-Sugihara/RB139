@@ -12,13 +12,13 @@
 
 6, Describe the two reasons we use blocks, use examples.
 
-7, When can you pass a block to a method?
+7, When can you pass a block to a method? Why?
 
 8, How do we make a block argument manditory?
 
-9, How do methods access blocks passed in?
+9, How do methods access both implicit and explicit blocks passed in?
 
-10, What is `yield` in Ruby?
+10, What is `yield` in Ruby and how does it work?
 
 11, How do we check if a block is passed into a method?
 
@@ -28,7 +28,7 @@
 
 14, Describe the arity differences of blocks, procs, methods and lambdas.
 
-15, What are other differences are there between lambdas and procs? (might not be assessed on this, but good to know)
+15, What other differences are there between lambdas and procs? (might not be assessed on this, but good to know)
 
 16, What does `&` do when in a the method parameter?
 
@@ -76,7 +76,7 @@ def time_it
 end
 ```
 
-22, What will be outputted from the method invocation on line 84? Why does/doesn't it raise an error?
+22, What will be outputted from the method invocation `block_method('turtle')` below? Why does/doesn't it raise an error?
 
 ```ruby
 def block_method(animal)
@@ -149,6 +149,91 @@ a = 'friend'
 a_method(&a)
 ```
 
+28, Why does the following code raise an error?
+
+```ruby
+def some_method(block)
+  block_given?
+end
+
+bl = { puts "hi" }
+
+p some_method(bl)
+```
+
+29, Why does the following code output `false`?
+
+```ruby
+def some_method(block)
+  block_given?
+end
+
+bloc = proc { puts "hi" }
+
+p some_method(bloc)
+```
+
+30, How do we fix the following code so the output is `true`? Explain
+
+```ruby
+def some_method(block)
+  block_given? # we want this to return `true`
+end
+
+bloc = proc { puts "hi" } # do not alter this code
+
+p some_method(bloc)
+```
+
+31, How does `Kernel#block_given?` work?
+
+32, Why do we get an `LocalJumpError` when executing the below code? &
+How do we fix it so the output is `hi`? (2 possible ways)
+
+```ruby
+def some(block)
+  block_given?
+  yield
+end
+
+bloc = proc { p "hi" } # do not alter
+
+some(bloc)
+```
+
+33, What does the following code tell us about lambda's? (probably not assess on this but good to know)
+
+```ruby
+bloc = lambda { p "hi" }
+
+bloc.class # => Proc
+bloc.lambda? # => true
+
+new_lam = Lambda.new { p "hi, lambda!" } # => NameError: uninitialized constant Lambda
+```
+
+34, What does the following code tell us about explicitly returning from proc's and lambda's? (once again probably not assess on this, but good to know ;)
+
+```ruby
+def lambda_return
+  puts "Before lambda call."
+  lambda {return}.call
+  puts "After lambda call."
+end
+
+def proc_return
+  puts "Before proc call."
+  proc {return}.call
+  puts "After proc call."
+end
+
+lambda_return #=> "Before lambda call."
+              #=> "After lambda call."
+
+proc_return #=> "Before proc call."
+
+```
+
 # TESTING WITH MINITEST
 
 28, What is a test suite?
@@ -177,14 +262,18 @@ a_method(&a)
 
 # CORE TOOLS
 
-40, What are the purpose of core tools?
+40, What are the purposes of core tools?
 
 41, What are RubyGems and why are they useful?
 
 42, What is Version Control and why are they useful?
 
-43, What is Bundler and why are they useful?
+43, What is Bundler and why is it useful?
 
-44, What is Rake and why are they useful?
+44, What is Rake and why is it useful?
 
 45, What constitues a Ruby project?
+
+```
+
+```
