@@ -24,7 +24,7 @@
 
 12, Why is it important to know that methods and blocks can return closures?
 
-13, What are the benifits of explicit block?
+13, What are the benifits of explicit blocks?
 
 14, Describe the arity differences of blocks, procs, methods and lambdas.
 
@@ -266,7 +266,7 @@ proc_return #=> "Before proc call."
 
 41, What are RubyGems and why are they useful?
 
-42, What is Version Control and why are they useful?
+42, What are Version Managers and why are they useful?
 
 43, What is Bundler and why is it useful?
 
