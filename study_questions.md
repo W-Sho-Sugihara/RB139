@@ -201,7 +201,7 @@ bloc = proc { p "hi" } # do not alter
 some(bloc)
 ```
 
-33, What does the following code tell us about lambda's? (probably not assess on this but good to know)
+33, What does the following code tell us about lambda's? (probably not assessed on this but good to know)
 
 ```ruby
 bloc = lambda { p "hi" }
@@ -212,7 +212,7 @@ bloc.lambda? # => true
 new_lam = Lambda.new { p "hi, lambda!" } # => NameError: uninitialized constant Lambda
 ```
 
-34, What does the following code tell us about explicitly returning from proc's and lambda's? (once again probably not assess on this, but good to know ;)
+34, What does the following code tell us about explicitly returning from proc's and lambda's? (once again probably not assessed on this, but good to know ;)
 
 ```ruby
 def lambda_return
