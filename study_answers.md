@@ -2,29 +2,47 @@
 
 1, What are closures?
 
-Closures allow us to create a 'chunk of code' that can be passed around to be called upon later on.
+Closures are a 'chunk of code' that can be passed around to be called upon later on. Within Ruby, Blocks, Proc objects and Lambda's are all closures.
 
 2, What is binding?
 
-Binding is the relationship that closures share with their surrounding artifacts. Closures have access to variables, methods, constants, etc based on where they are defined regardless of when or where they are called upon later, we call this behavior and relationship, binding.
+Binding is the relationship that closures share with the surrounding artifacts (methods, variables, constants) of its scope upon being defined. Closures can access and/or update these artifacts regardless of when or where the closure is called upon later, we call this behavior and relationship, binding.
 
 3, How does binding affect the scope of closures?
 
-Binding allows closures to access variablse, methods, constants based on where the closure is defined and not when it is called upon. Therefore this allows closures and whatever is calling upon the closure to access or manipulate data on something that may be completely out of its scope normal scope, had there been no binding.
+Binding allows closures to access variablse, methods, constants based on the scope of when the closure is defined and not when it is called upon. Therefore this allows closures and whatever is calling upon the closure to access or manipulate data that may be completely out of its normal scope, had there been no binding.
 
 Example
 
 ```ruby
 def some_method(pro)
-  pro.call
+  puts pro.call # the local variable `name` is out of scope for the method, but is accessible through binding
 end
 name = 'Joe'
-some_proc = proc { puts name}
+some_proc = proc { name }
 
 some_method(some_proc)
 ```
 
 This example shows us that a closure (the proc) is bound to the local var `name` and is able access it even if it is called upon within a method, where local variable are normally not accessable unless explicitly passed in as an argument upon method invocation.
+
+LS Example:
+
+```ruby
+def for_each_in(arr)
+  arr.each { |element| yield element } # the `results` array is out of scope, but is accessible through binding
+end
+
+arr = [1, 2, 3, 4, 5]
+results = [0]
+
+for_each_in(arr) do |number|
+  total = results[-1] + number
+  results.push(total)
+end
+
+p results # => [0, 1, 3, 6, 10, 15]
+```
 
 4, How do blocks work?
 
@@ -93,7 +111,7 @@ end
 
 10, What is `yield` in Ruby?
 
-`yield` in Ruby is a keyword used in a method definition that calls the implicit block passed into the method. `yield` can accept arguments and pass them into the block and assign them to the block local variable defined it its parameters.
+`yield` in Ruby is a keyword used in a method definition that calls implicit and eplicit blocks passed into the method. `yield` can accept arguments and pass them into the block and assign them to the block local variable defined it its parameters.
 
 11, How do we check if a block is passed into a method?
 
@@ -101,11 +119,79 @@ We can use the `Kernel#block_given?` method to see if an implicit block was pass
 
 12, Why is it important to know that methods and blocks can return closures?
 
-It is important to know that closures can be returned from and passed to other methods because this allows us to access data that would usally be out of scope and pass along functionality allowing for DRY and flexible code.
+It is important to know that closures can be returned from and passed to other methods because this allows us to access data that would usally be out of scope and pass along functionality allowing for DRY and flexible code. It is also important to remember that closures returned from method and blocks that are defined withing those methods and/or blocks will have access to the artifacts within the scope of those methods and/or blocks, thus allowing the returned closure to reference and/or alter those artifacts at a later time.
+
+Example:
+
+```ruby
+def retained_array
+  arr = []
+  Proc.new do |el|
+    arr << el
+    arr
+  end
+end
+
+arr = retained_array
+p arr.call('one') #=> ["one"]
+p arr.call('two') #=> ["one", "two"]
+p arr.call('three') #=> ["one", "two", "three"]
+```
+
+Example:
+
+```ruby
+def contained_data(password)
+  Proc.new do |new_password|
+    password = new_password unless new_password.nil?
+    password
+  end
+end
+
+joes_password = contained_data("joesmith2022")
+p joes_password.call #=> "joesmith2022"
+p joes_password.call("joeharvy2022") #=> "joeharvy2022"
+
+```
+
+Example from LS:
+
+```ruby
+def sequence
+  counter = 0
+  Proc.new { counter += 1 }
+end
+
+s1 = sequence # a unique memory is created and retained of the `counter` var in the `sequence` method
+p s1.call           # => 1
+p s1.call           # => 2
+p s1.call           # => 3
+puts
+
+s2 = sequence #= a new unique memory is created and retained of the `counter` var of the `sequnece` method
+p s2.call           # => 1
+p s1.call           # => 4 (note: this is s1)
+p s2.call           # => 2
+```
 
 13, What are the benifits of explicit block?
 
-Explicit blocks allow us to reference the block (now a proc) within the method definition via a variable and allows to the pass in the block to other methods or return the block.
+Explicit blocks allow us to reference the block (now a proc) within the method definition via a variable and allows to the pass the block to other methods or return the block. It also allows us to be able to return the explicit block from the method as a proc object.
+Example:
+
+```ruby
+def some_method  #implicit block
+  return yield
+end
+
+puts some_method {"Joe"} #=> "Joe"
+
+def some_method2 (&bloc)
+  return bloc
+end
+
+puts some_method2 {"Joe"} #=> proc object <Proc:0x000055b5376f6d68>
+```
 
 14, Describe the arity differences of blocks, procs, methods and lambdas.
 
@@ -121,7 +207,7 @@ Proc is a class and procs are instantiations of that class. Lambda's are also an
 def method(&var); end
 ```
 
-It converts the passed in block into a simple proc object allowing it to be assigned to the parameter variable appending the `&`.
+It converts the passed in block into a simple proc object allowing it to be assigned to the parameter variable appending the unary ampersand symbol `&`.
 
 17, What does `&` do when in a method invocation argument?
 
@@ -129,7 +215,18 @@ It converts the passed in block into a simple proc object allowing it to be assi
 method(&var)
 ```
 
-It checks to see if the passed in argument is a block and if it isnt' it will call `to_proc` on it to convert it into a block. If the passed in object is not a block and does not have a `to_proc` method then an error will be raised.
+It checks to see if the passed in argument is a proc obj and converts it into a block. If it isnt' a proc obj it will call `#to_proc` on it to convert it into aproc obj first then convert it into a block. If the passed in object is not a proc obj and does not have a `#to_proc` method an error will be raised.
+
+Example:
+
+```ruby
+def some_method
+  puts yield # => outputs "HI"
+end
+ppp = proc {'HI'}
+
+some_method(&ppp) #converts the proc into a block
+```
 
 18, What is happening in the code below?
 
@@ -139,7 +236,13 @@ arr = [1, 2, 3, 4, 5]
 p arr.map(&:to_s) # specifically `&:to_s`
 ```
 
-The `&` is going to call `#to_proc` on the symbol `:to_s` to change it into a block to then be passed into the `map` method.
+The unary ampersand symbol `&` is going to call `#to_proc` on the symbol `:to_s` to change it into a block to then be passed into the `#map` method.
+
+```ruby
+# :to_s.to_proc -> block
+
+p arr.map { |n| n.to_s } # code would look like this after conversion if executed
+```
 
 19, How do we get the desired output without altering the method or the method invocations?
 
@@ -192,7 +295,7 @@ block_method('turtle') do |turtle, seal|
 end
 ```
 
-The output will be `"This is a turtle and a ."`. This will not raise an error because procs have lenient arity, meaning they can accept more or less arguments than defined without raising an error. Any unassigned parameter variables will be assign to nil.
+The output will be `"This is a turtle and a ."`. This will not raise an error because blocks have lenient arity, meaning they can accept more or less arguments than defined without raising an error. Any unassigned parameter variables will be assign to nil.
 
 23, What will be outputted if we add the follow code to the code above? Why?
 
@@ -265,6 +368,159 @@ a_method(&a)
 
 The `&` is trying to call the `to_proc` method on the string object `a` but the string class does not have a `to_proc` method and hence an error is raised.
 
+28, Why does the following code raise an error?
+
+```ruby
+def some_method(block)
+  block_given?
+end
+
+bl = { puts "hi" }
+
+p some_method(bl)
+```
+
+The above code will raise an error because we are trying to assign a block to a local variable, which cannot happen because blocks are not objects.
+
+29, Why does the following code output `false`?
+
+```ruby
+def some_method(block)
+  block_given?
+end
+
+bloc = proc { puts "hi" }
+
+p some_method(bloc)
+```
+
+The above code will output false because we are not passing in a block, but a proc object. If we prepent a unary ampersand symbol `&` before the passed in argument on `line 393` and before the parameter variable `block` on `line 387` of `some_method` then the output will be `true`.
+
+30, How do we fix the following code so the output is `true`? Explain
+
+```ruby
+def some_method(block)
+  block_given? # we want this to return `true`
+end
+
+bloc = proc { puts "hi" } # do not alter this code
+
+p some_method(bloc)
+```
+
+Answer ==>
+
+```ruby
+def some_method(&block) # or simply remove the explicit block parameter
+  block_given? # we want this to return `true`
+end
+
+bloc = proc { puts "hi" } # do not alter this code
+
+p some_method(&bloc)
+```
+
+By prepending the unary ampersand symbol `&` on both locations allow us to remove the positional arguments of the method invocation and method definition and pass in a block in their stead. The unary ampersand symbol `&` in the method invocation converts the proc obj into a block and the unary ampersand symbol `&` in the method definition makes the block an explicit block parameter. Therefore because a block is being passed into the method `#block_given?` will return `true`, even though the explicit block parameter will convert the block into a proc obj. We could simply remove the explicit block parameter as well and we would get the same return value.
+
+31, How does `Kernel#block_given?` work?
+
+`Kernel#block_given?` will check to see if `yield` would execute in the current context without raising an error. If `yield` will execute then `Kernel#block_given?` will return `true`, if `yield` will raise an error then `Kernel#block_given?` will return `false`.
+
+32, Why do we get a `LocalJumpError` when executing the below code? &
+How do we fix it so the output is `hi`? (2 possible ways)
+
+```ruby
+def some(block)
+  yield
+end
+
+bloc = proc { p "hi" } # do not alter
+
+some(bloc)
+```
+
+We get a `LocalJumpError` because the `yield` keyword is searching for a block passed into the method, but no implicit or explicit block has been passed in. To remedy this we can use the unary ampersand symbol `&` in the following locations.
+
+Possible answer 1 ==>
+
+```ruby
+def some(&block)
+  yield
+end
+
+bloc = proc { p "hi" } # do not alter
+
+some(&bloc)
+```
+
+Possible answer 2 ==>
+
+```ruby
+def some
+  yield
+end
+
+bloc = proc { p "hi" } # do not alter
+
+some(&bloc)
+```
+
+33, What does the following code tell us about lambda's? (probably not assessed on this but good to know)
+
+```ruby
+bloc = lambda { p "hi" }
+
+bloc.class # => Proc
+bloc.lambda? # => true
+
+new_lam = Lambda.new { p "hi, lambda!" } # => NameError: uninitialized constant Lambda
+```
+
+(Try to figure this one out yourself ;)
+
+34, What does the following code tell us about explicitly returning from proc's and lambda's? (once again probably not assessed on this, but good to know ;)
+
+```ruby
+def lambda_return
+  puts "Before lambda call."
+  lambda {return}.call
+  puts "After lambda call."
+end
+
+def proc_return
+  puts "Before proc call."
+  proc {return}.call
+  puts "After proc call."
+end
+
+lambda_return #=> "Before lambda call."
+              #=> "After lambda call."
+
+proc_return #=> "Before proc call."
+
+```
+
+(try to figure this one out yourslef ;)
+
+35, What will `#p` output below? Why is this the case and what is this code demonstrating?
+
+```ruby
+def retained_array
+  arr = []
+  Proc.new do |el|
+    arr << el
+  end
+end
+
+arr = retained_array
+arr.call('one')
+arr.call('two')
+arr.call('three') << 4
+p arr.call("five")
+```
+
+The output will be `["one", "two", "three", 4, "five"]`. The code demonstrates the binding rules of closures defined within a method and returned from that method. We can see though this example that closures defined within a method will be bound to the artifacts found within the scope of that method. In this case the proc obj is bound to the local variable `arr` within the method definition. Hence when we call the returned proc object the proc object will push the passed in argument into the array assigned to the local var `arr` even though the variable `arr` is out of scope and normally not accessible outside the method definition.
+
 # TESTING WITH MINITEST
 
 28, What is a test suite?
@@ -273,19 +529,19 @@ A collection of tests.
 
 29, What is a test?
 
-The environment in with which we confirm if a certain code performs an expected way.
+The environment in which an assertion is executed. A test can have multiple assertions.
 
 30, What is an assertion?
 
 An assertion is the actual process we use to confirm if a certain code performs an expected way.
 
-31, What do testing framworks provide? remember
+31, What do testing frameworks provide?
 
 They provide a way to describe the type of tests desired, a way to execute those tests and a way to report/display the results.
 
 32, What are the differences of Minitest vs RSpec
 
-Minitest is written in Ruby and RSpec uses a DSL and reads like English. Minitest used to be included in Ruby and so many developers are familiar to Minitest.
+Minitest is written in Ruby and RSpec uses a DSL and reads like English. Minitest used to be included in Ruby and so many developers are familiar with Minitest.
 
 33, What is Domain Specific Language (DSL)?
 
@@ -333,7 +589,7 @@ Version managers allow one to control which versions of Ruby we have and determi
 
 Bundler is a Gem that uses a Gemfile to consolidate and determine the needed dependencies and their versions for your program. Bundler uses the Gemfile to download and install the needed dependencies for your program. Bundler further prevents your program from running gems from your library and only from those dependencies that you downloaded through the Gemfile. By creating a `Gemfile` and `Gemfile.lock` Bundler prevents your program from running the wrong ruby version, gem versions, rake version, etc and only run the versions that you determined in the `Gemfile`. Bundler must be installed on each version of ruby if using a version manager.
 
-44, What is Rake and why are they useful?
+44, What is Rake and why is it useful?
 
 Rake is a Gem that helps streamline project managament and developement by automating tasks when building, maintaining, testing, packaging and installing. Rake is included in modern ruby installation.
 

@@ -128,11 +128,12 @@ def call_me(some_code)
   some_code.call
 end
 
+name = "Robert"
+
 def name
   "Joe"
 end
 
-name = "Robert"
 chunk_of_code = Proc.new {puts "hi #{name}"}
 
 call_me(chunk_of_code)
@@ -187,12 +188,11 @@ p some_method(bloc)
 
 31, How does `Kernel#block_given?` work?
 
-32, Why do we get an `LocalJumpError` when executing the below code? &
+32, Why do we get a `LocalJumpError` when executing the below code? &
 How do we fix it so the output is `hi`? (2 possible ways)
 
 ```ruby
 def some(block)
-  block_given?
   yield
 end
 
@@ -234,46 +234,59 @@ proc_return #=> "Before proc call."
 
 ```
 
+35, What will `#p` output below? Why is this the case and what is this code demonstrating?
+
+```ruby
+def retained_array
+  arr = []
+  Proc.new do |el|
+    arr << el
+    arr
+  end
+end
+
+arr = retained_array
+arr.call('one')
+arr.call('two')
+p arr.call('three')
+```
+
 # TESTING WITH MINITEST
 
-28, What is a test suite?
+36, What is a test suite?
 
-29, What is a test?
+37, What is a test?
 
-30, What is an assertion?
+38, What is an assertion?
 
-31, What do testing framworks provide?
+39, What do testing framworks provide?
 
-32, What are the differences of Minitest vs RSpec
+40, What are the differences of Minitest vs RSpec
 
-33, What is Domain Specific Language (DSL)?
+41, What is Domain Specific Language (DSL)?
 
-34, What is the difference of assertion vs refutation methods?
+42, What is the difference of assertion vs refutation methods?
 
-35, How does assert_equal compare its arguments?
+43, How does assert_equal compare its arguments?
 
-36, What is the SEAT approach and what are its benefits?
+44, What is the SEAT approach and what are its benefits?
 
-37, When does setup and tear down happen when testing?
+45, When does setup and tear down happen when testing?
 
-38, What is code coverage?
+46, What is code coverage?
 
-39, What is regression testing?
+47, What is regression testing?
 
 # CORE TOOLS
 
-40, What are the purposes of core tools?
+48, What are the purposes of core tools?
 
-41, What are RubyGems and why are they useful?
+49, What are RubyGems and why are they useful?
 
-42, What are Version Managers and why are they useful?
+50, What are Version Managers and why are they useful?
 
-43, What is Bundler and why is it useful?
+51, What is Bundler and why is it useful?
 
-44, What is Rake and why is it useful?
+52, What is Rake and why is it useful?
 
-45, What constitues a Ruby project?
-
-```
-
-```
+53, What constitues a Ruby project?

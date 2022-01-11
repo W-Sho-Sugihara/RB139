@@ -41,11 +41,11 @@ AA New Section CLOSURES
 
 # aa1 Closures
 
-Closures allow us to bundle a "chunk of code" and save it for later use. Surrounding artifacts (variables, methods, objects) are bound to this "chunk of code" and allows the code to reference them when the closure is executed at a later time. Closures are like methods without names that can be passes around within a program. `Block`s, `Proc`s and `lambda`s are all examples of closures. Closers can be returned from a method or block in the form of Proc's and lambda's.
+Closures are a "chunk of code" and can be saved for later use. Surrounding artifacts (variables, methods, objects) are bound to this "chunk of code" and allows the code to reference them when the closure is executed at a later time. Closures are like methods without names that can be passes around within a program. `Block`s, `Proc`s and `lambda`s are all examples of closures. Closers can be returned from a method or block in the form of Proc's and lambda's.
 
 # aa2 Binding
 
-Closures are bound to their surrounding artifacts, meaning the closures retain their references to their surrounding artifacts (methods, variables, objects, etc.)
+Closures are bound to their surrounding artifacts, meaning the closures retain the references to their surrounding artifacts (methods, variables, objects, etc.) at the time of definition when they are called later.
 
 ```ruby
 def call_me(some_code)
@@ -63,7 +63,7 @@ The `chunk of code` remembers the `name` variable aand changes that are made to 
 
 # aa3 Proc
 
-A Proc is instance object of the Proc class and encapsulates a block that can be passed into methods or another Proc to then be invoked. When added to methods, be aware that a Procs will end the calling method excecution if the Proc explicitly calls the return statement because Proc's do not return control back to the calling method. Proc's have lenient arity and will not raise an error when the number of arguments passed in do not match the parameters.
+A Proc is instance object of the Proc class and assigns a variable to a block that can be passed into methods or another Proc to then be invoked. When added to methods, be aware that a Procs will end the calling method excecution if the Proc explicitly calls the return statement because Proc's do not return control back to the calling method. Proc's have lenient arity and will not raise an error when the number of arguments passed in do not match the parameters.
 
 # aa4 Lambda
 
@@ -71,7 +71,7 @@ Lambda's are part of the `Kernel` module and are equivalent to `Proc.new`, but w
 
 # aa5 Blocks
 
-Blocks are defined by `do...end` statements and `{ }` and can be passed into any method. The method must be defined the in a way to use that block or the method will ignore the block. Blocks are an implicit parameter in all methods and are not part of the method definition. Blocks can be thought of as 'un-named methods' or 'anonymous methods'. The return value of a block is determined by its last expression. Block have a lenient arity and will not raise an error when the number of arguments passed in do not match the parameters.
+Blocks are defined by `do...end` statements and `{ }` and can be passed into any method. Blocks are not objects and therefore cannot be assigned to local varia bles. Methods must be defined in a way to use passed in blocks or the method will ignore the block. Blocks are an implicit parameter in all methods and are not part of the method definition. Blocks can be thought of as 'un-named methods' or 'anonymous methods'. The return value of a block is determined by its last expression. Block have a lenient arity and will not raise an error when the number of arguments passed in do not match the parameters.
 
 Example:
 
@@ -187,11 +187,11 @@ The block can contain a block parameter defined within `||`. The block local var
 
 # aa9 Kernel#block_given?
 
-Methods with a `yield` keyword will raise an error if no block is passed in. Hence we use `Kernel#block_given?` to create a condition, only call `yield` if a block is passed in.
+Methods with a `yield` keyword will raise an `LocalJumpError` if no block is passed in. Hence we use `Kernel#block_given?` to create a condition, only call `yield` if a block is passed in. `Kernel#block_given?` uses the `yield` keyword to determine its results. If `yield` would execute some code and not raise an error then `Kernel#block_given?` will return `true`, but if `yield` would raise an error in the current context then `Kernel#block_given?` will return `false`.
 
 # aa10 Yielding
 
-The `yield` keyword within a method definition is required to execute the block passed in. The method still requires the expected number of arguments to be passed in regardless of the block passed in.
+The `yield` keyword within a method definition is required to execute an implicit block passed in. The method still requires the expected number of arguments to be passed in regardless of the block passed in.
 `Yield` allows us to inject functionality in the form of a block anywhere within the method definition without modifying the existing method implementation.
 
 # aa11 Yielding with an argument
@@ -288,7 +288,7 @@ They provide:
 
 # bb6 Assertion Methods
 
-The actual verification step that confirms that the outcome of the program is what you were expecting. A test can have multiple assertions.
+The actual verification step that confirms whether the outcome of the program is what you were expecting. A test can have multiple assertions.
 
 Assertion---------------------------Description
 assert(test)------------------------Fails unless test is truthy.
